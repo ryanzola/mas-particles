@@ -1,11 +1,26 @@
 uniform float time;
-uniform float progress;
-uniform sampler2D texture1;
-uniform vec4 resolution;
+
+varying vec2 vCoordinates;
+varying vec3 vPos;
 varying vec2 vUv;
-varying vec3 vPosition;
-float PI = 3.141592653589793238;
-void main()	{
-	// vec2 newUV = (vUv - vec2(0.5))*resolution.zw + vec2(0.5);
-	gl_FragColor = vec4(vUv,0.0,1.);
+
+uniform sampler2D mask;
+uniform sampler2D t1;
+uniform sampler2D t2;
+uniform float move;
+
+float PI=3.141592653589793238;
+
+void main(){
+	vec4 maskTexture=texture2D(mask,gl_PointCoord);
+	vec2 myUV=vec2(vCoordinates.x/512.,vCoordinates.y/512.);
+	vec4 tt1=texture2D(t1,myUV);
+	vec4 tt2=texture2D(t2,myUV);
+	
+	vec4 final=mix(tt1,tt2,(0.,1.,fract(move)));
+	
+	float alpha=1.-clamp(0.,1.,abs(vPos.z/900.));
+	
+	gl_FragColor=final;
+	gl_FragColor.a*=maskTexture.r*alpha;
 }
